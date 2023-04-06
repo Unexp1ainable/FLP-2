@@ -1,4 +1,3 @@
-:- debug.
 :- dynamic(cube/1).
 
 dec(0, _) :- !.
@@ -39,18 +38,31 @@ rotateVerticalSide([[T1,T2,T3], Front, [R1,R2,R3], Back, [L1,L2,L3], [B1,B2,B3]]
 rotateVerticalSide([[T1,T2,T3], Front, [R1,R2,R3], Back, [L1,L2,L3], [B1,B2,B3]],
     [[T1,T2,R3], Front, [R1,R2,B3], Back, [L1,L2,T3], [B1,B2,L3]], 1).
 
-doMove(X,R) :- rotateHorizontal(X,R,_) ; rotateVerticalFront(X,R,_), rotateVerticalSide(X,R,_).
+doMove(X,R) :- rotateHorizontal(X,R,_) ; rotateVerticalFront(X,R,_); rotateVerticalSide(X,R,_).
 
-solve(X) :- 
-    (not(isSolved(X)) ->
+solve(X, [X]) :- isSolved(X). 
+solve(X, [X|Result]) :- 
+    not(isSolved(X)),
     not(cube(X)),
     assertz(cube(X)),
     doMove(X,R),
-    solve(R),
-    writeln(X);
-    writeln(X)).
+    solve(R, Result). 
 
 isComplete(Side) :- flatten(Side, [H|Flattened]), maplist(=(H), Flattened).
 isSolved([Top, Front, Right, Back, Left, Bottom]) :- isComplete(Top),isComplete(Front),isComplete(Right),isComplete(Back),isComplete(Left),isComplete(Bottom). 
 
-stuff :- loadCube(X), solve(X).
+
+printRow([A,B,C]) :- put_char(A), put_char(B), put_char(C).
+printSideStandalone([A,B,C]) :- printRow(A), put_char("\n"), printRow(B), put_char("\n"), printRow(C), put_char("\n").
+printRowOfFour([R1,R2,R3,R4]) :- printRow(R1), put_char(" "), printRow(R2), put_char(" "), printRow(R3), put_char(" "), printRow(R4), put_char("\n"). 
+printSides(A,B,C,D) :- 
+    transformLoadedSides(T1,T2,T3,A,B,C,D),
+    printRowOfFour(T1),
+    printRowOfFour(T2),
+    printRowOfFour(T3).
+
+printCube([Top, Front, Right, Back, Left, Bottom]) :- printSideStandalone(Top), printSides(Front, Right, Back, Left), printSideStandalone(Bottom).
+printPath([]).
+printPath([H|T]) :- printCube(H), printPath(T).
+
+main :- writeln("Cube"), loadCube(X), solve(X,R), writeln("Cuuuube"), printPath(R).
