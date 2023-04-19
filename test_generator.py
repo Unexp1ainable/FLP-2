@@ -182,12 +182,7 @@ class Cube:
 
 
 if __name__ == "__main__":
-    for i in range(3):
-        print("rotateVerticalSide(")
-        cube = Cube()
-        cube.printPrologConfiguration()
-        print(",\n")
-        cube.rotate(Ring.VERTICAL_SIDE, i, Direction.RIGHT)
-        cube.printPrologConfiguration()
-        print(").")
+    cube = Cube()
+    cube.shuffle(3)
+    print(cube)
 

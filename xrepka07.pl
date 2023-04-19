@@ -19,9 +19,13 @@ loadSideStandalone([R1,R2,R3]) :- loadRow(R1), eatChar, loadRow(R2), eatChar, lo
 
 loadCube([Top, Front, Right, Back, Left, Bottom]) :- loadSideStandalone(Top), loadSides(Front, Right, Back, Left), loadSideStandalone(Bottom).
 
-
-
-doMove(X,R) :- rotateHorizontal(X,R) ; rotateVerticalFront(X,R); rotateVerticalSide(X,R).
+doMove(X,R) :- 
+    rotateHorizontal(X,R); 
+    rotateVerticalFront(X,R); 
+    rotateVerticalSide(X,R); 
+    rotateHorizontal(R,X); 
+    rotateVerticalFront(R,X); 
+    rotateVerticalSide(R,X).
 
 solve(X, [X]) :- isSolved(X). 
 solve(X, [X|Result]) :- 
