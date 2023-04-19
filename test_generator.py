@@ -1,3 +1,4 @@
+from itertools import product
 import random
 import numpy as np
 from enum import Enum
@@ -55,13 +56,17 @@ def rotateSide(side: np.ndarray, dir: Direction) -> np.ndarray:
 
 
 class Cube:
-    def __init__(self) -> None:
-        self.top = createSide(ANSIColor.Magenta)
-        self.front = createSide(ANSIColor.Green)
-        self.right = createSide(ANSIColor.White)
-        self.back = createSide(ANSIColor.Blue)
-        self.left = createSide(ANSIColor.Yellow)
-        self.bottom = createSide(ANSIColor.Red)
+    def __init__(self, sides=None) -> None:
+        if not sides:
+            self.top = createSide(ANSIColor.Magenta)
+            self.front = createSide(ANSIColor.Green)
+            self.right = createSide(ANSIColor.White)
+            self.back = createSide(ANSIColor.Blue)
+            self.left = createSide(ANSIColor.Yellow)
+            self.bottom = createSide(ANSIColor.Red)
+
+        else:
+            self.top, self.front, self.right, self.back, self.left, self.bottom = sides
 
         self.horizontalRing = [self.front, self.right, self.back, self.left]
         self.verticalFrontRing = [self.top, self.back, self.bottom, self.front]
@@ -177,7 +182,6 @@ class Cube:
 
         print(res)
 
-
     def nStr(self):
         result = ""
         for row in self.top:
@@ -198,10 +202,44 @@ class Cube:
             result += "\n"
         return result[:-1]
 
+def vGen(chars: str):
+    for char in chars:
+        if char in ("123456"):
+            yield int(char)
+    raise ValueError("Wrong format of an input string")
 
+def loadCube(out : str) -> Cube:
+    top, front,right, back, left, bottom = [np.ones((3,3,2), np.int8) for i in range(6)]
+    gen = vGen(out)
+    # top
+    for y, x in product(range(3), range(3)):
+        num = gen.__next__()
+        top[y,x] = ((num,num))
+
+    # side sides
+    for y, side, x in product(range(3),  [front,right, back, left], range(3)):
+        num = gen.__next__()
+        side[y,x] = ((num,num))
+
+    # bottom
+    for y, x in product(range(3), range(3)):
+        num = gen.__next__()
+        bottom[y,x] = ((num,num))
+
+    return Cube([top, front,right, back, left, bottom])
 
 if __name__ == "__main__":
-    cube = Cube()
-    cube.shuffle(3)
+    aaa="""
+626
+646
+636
+161 222 353 444
+262 333 454 111
+464 111 252 333
+515
+525
+545
+    """
+    cube = loadCube(aaa)
+    # cube.shuffle(3)
     print(cube.nStr())
-
