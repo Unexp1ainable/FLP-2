@@ -1,2 +1,5 @@
 flp22-log
 .vscode
+__pycache__
+.gitignore
+a
