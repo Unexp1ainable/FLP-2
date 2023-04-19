@@ -58,7 +58,7 @@ rotateHorizontal(
     [Bo7,Bo8,Bo9]
     ]]
     
-    ) :- writeln("Horizontal1").
+    ).
     rotateHorizontal(
     [[
     [To1,To2,To3],
@@ -114,7 +114,7 @@ rotateHorizontal(
     [Bo7,Bo8,Bo9]
     ]]
     
-    ) :- writeln("Horizontal2").
+    ).
     rotateHorizontal(
     [[
     [To1,To2,To3],
@@ -170,7 +170,7 @@ rotateHorizontal(
     [Bo9,Bo6,Bo3]
     ]]
     
-    ) :- writeln("Horizontal3").
+    ).
     
 
 % ===============================================
@@ -231,7 +231,7 @@ rotateVerticalFront(
     [Ba3,Bo8,Bo9]
     ]]
     
-    ) :- writeln("Vertical Front").
+    ).
     rotateVerticalFront(
     [[
     [To1,To2,To3],
@@ -287,7 +287,7 @@ rotateVerticalFront(
     [Bo7,Ba2,Bo9]
     ]]
     
-    ) :- writeln("Vertical Front").
+    ).
     rotateVerticalFront(
     [[
     [To1,To2,To3],
@@ -343,7 +343,7 @@ rotateVerticalFront(
     [Bo7,Bo8,Ba1]
     ]]
     
-    ) :- writeln("Vertical Front").
+    ).
     
 
 % ===============================================
@@ -404,7 +404,7 @@ rotateVerticalSide(
     [Ri9,Ri6,Ri3]
     ]]
     
-    ) :- writeln("Vertical side.").
+    ).
     rotateVerticalSide(
     [[
     [To1,To2,To3],
@@ -460,7 +460,7 @@ rotateVerticalSide(
     [Bo7,Bo8,Bo9]
     ]]
     
-    ) :- writeln("Vertical side.").
+    ).
     rotateVerticalSide(
     [[
     [To1,To2,To3],
@@ -516,5 +516,5 @@ rotateVerticalSide(
     [Bo7,Bo8,Bo9]
     ]]
     
-    ) :- writeln("Vertical side.").
+    ).
     

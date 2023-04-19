@@ -178,11 +178,30 @@ class Cube:
         print(res)
 
 
+    def nStr(self):
+        result = ""
+        for row in self.top:
+            for item in row:
+                result += str(item[1])
+            result += "\n"
+
+        for row in range(3):
+            for side in [self.front, self.right, self.back, self.left]:
+                for item in side[row]:
+                    result += str(item[1])
+                result += " "
+            result += "\n"
+
+        for row in self.bottom:
+            for item in row:
+                result += str(item[1])
+            result += "\n"
+        return result[:-1]
 
 
 
 if __name__ == "__main__":
     cube = Cube()
     cube.shuffle(3)
-    print(cube)
+    print(cube.nStr())
 
