@@ -1,7 +1,7 @@
 :- use_module(cube_rotations).
 
-:- dynamic(cube/1).
 :- dynamic(maxLevel/1).
+:- dynamic(cube/1).
 
 dec(0, _) :- !.
 dec(X, R) :- R is X-1.
@@ -20,13 +20,9 @@ loadSideStandalone([R1,R2,R3]) :- loadRow(R1), eatChar, loadRow(R2), eatChar, lo
 
 loadCube([Top, Front, Right, Back, Left, Bottom]) :- loadSideStandalone(Top), loadSides(Front, Right, Back, Left), loadSideStandalone(Bottom).
 
-doMove(X,R) :- 
-    rotateHorizontal(X,R); 
-    rotateVerticalFront(X,R); 
-    rotateVerticalSide(X,R);
-    rotateHorizontal(R,X); 
-    rotateVerticalFront(R,X); 
-    rotateVerticalSide(R,X).
+doMove(X,R) :- rotateHorizontal(X,R). 
+doMove(X,R) :- rotateVerticalFront(X,R). 
+doMove(X,R) :- rotateVerticalSide(X,R).
 
 inc(X,Y) :- Y is X+1.
 
@@ -34,9 +30,8 @@ solve(X, [X], _) :- isSolved(X).
 solve(X, [X|Result], Level) :-
     maxLevel(MaxLevel),
     Next is Level + 1,
-    not(isSolved(X)),
-    not(cube(X)),
-    assertz(cube(X)),
+    % not(cube(X)),
+    % assertz(cube(X)),
     doMove(X,R),
     Next =< MaxLevel, 
     solve(R, Result, Next). 
@@ -55,7 +50,7 @@ printSides(A,B,C,D) :-
     printRowOfFour(T3).
 
 doIDS(X,R) :- maxLevel(Lvl), Lvl =< 20, solve(X,R,0).
-doIDS(X,R) :- maxLevel(Lvl),  Lvl =< 20, retractall(cube(_)), retract(maxLevel(Lvl)), inc(Lvl,NLvl), assertz(maxLevel(NLvl)), doIDS(X,R).
+doIDS(X,R) :- maxLevel(Lvl),  Lvl =< 20, retractall(cube(_)), retract(maxLevel(Lvl)), inc(Lvl,NLvl), writeln("Increased"), assertz(maxLevel(NLvl)), doIDS(X,R).
 
 
 printCube([Top, Front, Right, Back, Left, Bottom]) :- printSideStandalone(Top), printSides(Front, Right, Back, Left), printSideStandalone(Bottom).
@@ -63,5 +58,5 @@ printPathC([]).
 printPathC([H|T]) :- put_char("\n"), printCube(H), printPathC(T).
 printPath([H|T]) :- printCube(H), printPathC(T).
 
-main :- loadCube(X), assertz(maxLevel(3)), doIDS(X,R), printPath(R).
+main :- loadCube(X), assertz(maxLevel(1)), doIDS(X,R), printPath(R).
 % main :- loadCube(X), doMove(X, R), printCube(R).

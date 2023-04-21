@@ -1,5 +1,7 @@
+from copy import deepcopy
 from itertools import product
 import random
+import sys
 import numpy as np
 from enum import Enum
 
@@ -92,17 +94,40 @@ class Cube:
             result += "\n"
         return result[:-1] + colorTranslations[ANSIColor.White.value]
 
+    def __eq__(self, __value: object) -> bool:
+        return \
+            np.array_equal(self.top, __value.top) and \
+            np.array_equal(self.front, __value.front) and \
+            np.array_equal(self.right, __value.right) and \
+            np.array_equal(self.back, __value.back) and \
+            np.array_equal(self.left, __value.left) and \
+            np.array_equal(self.bottom, __value.bottom)
+    
+    def isSolved(self):
+        res = True
+        for side in [self.top, self.front, self.right, self.back, self.left, self.bottom]:
+            res = res and (side.min() == side.max())
+        return res
+
     def rotate(self, ring: Ring, index, direction: Direction):
         if (not 0 <= index < 3):
             print("Invalid index.")
             exit(1)
 
         if ring == Ring.HORIZONTAL:
-            tmp = self.horizontalRing[0][index].copy()
-            for i in range(0, 4*direction.value, direction.value):
-                self.horizontalRing[i][index] = self.horizontalRing[direction.value *
-                                                                    (abs(i+direction.value) % 4)][index]
-            self.horizontalRing[3*direction.value][index] = tmp
+            if direction == Direction.RIGHT:
+                tmp = self.front[index].copy()
+                self.front[index] = self.left[index]
+                self.left[index] = self.back[index]
+                self.back[index] = self.right[index]
+                self.right[index] = tmp
+
+            else:
+                tmp = self.front[index].copy()
+                self.front[index] = self.right[index]
+                self.right[index] = self.back[index]
+                self.back[index] = self.left[index]
+                self.left[index] = tmp
 
             if (index == 0):
                 self.top = rotateSide(self.top, direction)
@@ -150,10 +175,11 @@ class Cube:
                 self.back = rotateSide(self.back, direction.opposite())
 
     def shuffle(self, turns):
-        for i in range(turns):
+        for _ in range(turns):
             direction = random.choice([Direction.LEFT, Direction.RIGHT])
             ring = random.choice([Ring.HORIZONTAL, Ring.VERTICAL_FRONT])
-            index = random.randint(0, 2)
+            index = random.choice([0, 2])
+            print(f"{ring.name}-{direction.name}-{index}", file=sys.stderr)
             self.rotate(ring, index, direction)
 
     def printPrologConfiguration(self):
@@ -194,6 +220,7 @@ class Cube:
                 for item in side[row]:
                     result += str(item[1])
                 result += " "
+            result = result[:-1]
             result += "\n"
 
         for row in self.bottom:
@@ -202,44 +229,101 @@ class Cube:
             result += "\n"
         return result[:-1]
 
+    def isNextState(self, nextCube):
+        for ring, i, direction in product(Ring, range(3), Direction):
+            testCube = deepcopy(self)
+            testCube.rotate(ring, i, direction)
+            if nextCube == testCube:
+                return True
+
+        return False
+
+
 def vGen(chars: str):
     for char in chars:
         if char in ("123456"):
             yield int(char)
     raise ValueError("Wrong format of an input string")
 
-def loadCube(out : str) -> Cube:
-    top, front,right, back, left, bottom = [np.ones((3,3,2), np.int8) for i in range(6)]
-    gen = vGen(out)
+
+def loadCube(charGen) -> Cube:
+    top, front, right, back, left, bottom = [np.ones((3, 3, 2), np.int8) for i in range(6)]
     # top
     for y, x in product(range(3), range(3)):
-        num = gen.__next__()
-        top[y,x] = ((num,num))
+        num = charGen.__next__()
+        top[y, x] = ((num, num))
 
     # side sides
-    for y, side, x in product(range(3),  [front,right, back, left], range(3)):
-        num = gen.__next__()
-        side[y,x] = ((num,num))
+    for y, side, x in product(range(3),  [front, right, back, left], range(3)):
+        num = charGen.__next__()
+        side[y, x] = ((num, num))
 
     # bottom
     for y, x in product(range(3), range(3)):
-        num = gen.__next__()
-        bottom[y,x] = ((num,num))
+        num = charGen.__next__()
+        bottom[y, x] = ((num, num))
 
-    return Cube([top, front,right, back, left, bottom])
+    return Cube([top, front, right, back, left, bottom])
+
+
+def cubeResultGen(result: str):
+    gen = vGen(result)
+    while True:
+        yield loadCube(gen)
+
+def verifyResult(result: str) -> bool:
+    gen = cubeResultGen(result)
+    firstCube = gen.__next__()
+    shouldEnd = firstCube.isSolved()
+
+    while True:
+        try:
+            nextCube = gen.__next__()
+            if not nextCube.isNextState(firstCube):
+                print("FAILED")
+                print("Invalid rotation")
+                print("From:")
+                print(firstCube)
+                print("\nTo:")
+                print(nextCube)
+                return False
+            shouldEnd = nextCube.isSolved()
+            firstCube = nextCube
+
+        except:
+            if (shouldEnd):
+                print("PASSED")
+                return True
+            
+            else:
+                print("FAILED")
+                print("Solution did not end in completed state.")
+                print("Last state:")
+                print(firstCube)
+                return False
+
+    raise NotImplementedError("Achievement earned: How did we get here?")
+
 
 if __name__ == "__main__":
-    aaa="""
-626
-646
-636
-161 222 353 444
-262 333 454 111
-464 111 252 333
-515
-525
-545
-    """
-    cube = loadCube(aaa)
-    # cube.shuffle(3)
+    # print(":- module(cube_rotations, [rotateHorizontal/2, rotateVerticalFront/2, rotateVerticalSide/2]).\n\n")
+    # for r, s in [
+    #     (Ring.HORIZONTAL, "rotateHorizontal("),
+    #     (Ring.VERTICAL_SIDE, "rotateVerticalSide("),
+    #     (Ring.VERTICAL_FRONT, "rotateVerticalFront("),
+    #     ]:
+    #     for dir in Direction:
+    #         for i in [0,2]:
+    #             print(s)
+    #             cube = Cube()
+    #             cube.printPrologConfiguration()
+    #             print(",\n")
+    #             cube.rotate(r, i, dir)
+    #             cube.printPrologConfiguration()
+    #             print(").\n\n")
+    # cubes = sys.stdin.read()
+
+    # verifyResult(cubes)
+    cube = Cube()
+    cube.shuffle(7)
     print(cube.nStr())
