@@ -50,7 +50,7 @@ printSides(A,B,C,D) :-
     printRowOfFour(T3).
 
 doIDS(X,R) :- maxLevel(Lvl), Lvl =< 20, solve(X,R,0).
-doIDS(X,R) :- maxLevel(Lvl),  Lvl =< 20, retractall(cube(_)), retract(maxLevel(Lvl)), inc(Lvl,NLvl), writeln("Increased"), assertz(maxLevel(NLvl)), doIDS(X,R).
+doIDS(X,R) :- maxLevel(Lvl),  Lvl =< 20, retractall(cube(_)), retract(maxLevel(Lvl)), inc(Lvl,NLvl), assertz(maxLevel(NLvl)), doIDS(X,R).
 
 
 printCube([Top, Front, Right, Back, Left, Bottom]) :- printSideStandalone(Top), printSides(Front, Right, Back, Left), printSideStandalone(Bottom).

@@ -1,7 +1,6 @@
 from copy import deepcopy
 from itertools import product
 import random
-import sys
 import numpy as np
 from enum import Enum
 
@@ -179,7 +178,7 @@ class Cube:
             direction = random.choice([Direction.LEFT, Direction.RIGHT])
             ring = random.choice([Ring.HORIZONTAL, Ring.VERTICAL_FRONT])
             index = random.choice([0, 2])
-            print(f"{ring.name}-{direction.name}-{index}", file=sys.stderr)
+            # print(f"{ring.name}-{direction.name}-{index}", file=sys.stderr)
             self.rotate(ring, index, direction)
 
     def printPrologConfiguration(self):
@@ -266,64 +265,10 @@ def loadCube(charGen) -> Cube:
     return Cube([top, front, right, back, left, bottom])
 
 
-def cubeResultGen(result: str):
-    gen = vGen(result)
-    while True:
-        yield loadCube(gen)
-
-def verifyResult(result: str) -> bool:
-    gen = cubeResultGen(result)
-    firstCube = gen.__next__()
-    shouldEnd = firstCube.isSolved()
-
-    while True:
-        try:
-            nextCube = gen.__next__()
-            if not nextCube.isNextState(firstCube):
-                print("FAILED")
-                print("Invalid rotation")
-                print("From:")
-                print(firstCube)
-                print("\nTo:")
-                print(nextCube)
-                return False
-            shouldEnd = nextCube.isSolved()
-            firstCube = nextCube
-
-        except:
-            if (shouldEnd):
-                print("PASSED")
-                return True
-            
-            else:
-                print("FAILED")
-                print("Solution did not end in completed state.")
-                print("Last state:")
-                print(firstCube)
-                return False
-
-    raise NotImplementedError("Achievement earned: How did we get here?")
-
 
 if __name__ == "__main__":
-    # print(":- module(cube_rotations, [rotateHorizontal/2, rotateVerticalFront/2, rotateVerticalSide/2]).\n\n")
-    # for r, s in [
-    #     (Ring.HORIZONTAL, "rotateHorizontal("),
-    #     (Ring.VERTICAL_SIDE, "rotateVerticalSide("),
-    #     (Ring.VERTICAL_FRONT, "rotateVerticalFront("),
-    #     ]:
-    #     for dir in Direction:
-    #         for i in [0,2]:
-    #             print(s)
-    #             cube = Cube()
-    #             cube.printPrologConfiguration()
-    #             print(",\n")
-    #             cube.rotate(r, i, dir)
-    #             cube.printPrologConfiguration()
-    #             print(").\n\n")
-    # cubes = sys.stdin.read()
-
-    # verifyResult(cubes)
-    cube = Cube()
-    cube.shuffle(7)
-    print(cube.nStr())
+    for i, shuffles in product(range(15), range(1,7)):
+        cube = Cube()
+        cube.shuffle(shuffles)
+        with open(f"cubes/cube{shuffles}-{i}.txt", "w") as file:
+            file.write(cube.nStr())
